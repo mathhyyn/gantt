@@ -1,0 +1,15 @@
+@import "./gantt-timeline/gantt-timeline.scss";
+@import "./gantt/gantt-diagram/gantt-diagram.scss";
+
+html {
+    font-family: Roboto sans-serif;
+    background: rgba(245, 222, 179, 0.41);
+}
+
+.gantt-container {
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}

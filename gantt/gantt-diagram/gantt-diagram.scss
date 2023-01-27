@@ -1,0 +1,47 @@
+.gantt-diagram {
+  position: relative;
+  display: flex;
+  height: inherit;
+}
+
+.gantt-events {
+  display: flex;
+  flex-direction: column;
+  height: inherit;
+}
+
+.gantt-diagram-box {
+  position: relative;
+  height: auto;
+  border: solid 1px #000;
+  border-top: none;
+  overflow: hidden;
+}
+
+.gantt-event-box {
+  position: relative;
+  margin: 5px 0px 5px 0px;
+  height: 30px;
+  user-select: none;
+}
+
+.gantt-diagram-event {
+  width: inherit;
+  height: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  color: rgb(0, 0, 0);
+  background-color: rgb(117, 184, 124);
+  border-radius: 2px;
+  user-select: none;
+}
+
+.gantt-svg {
+  position: absolute;
+  overflow: visible;
+  z-index: 2;
+  top: 0;
+}
