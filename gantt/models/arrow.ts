@@ -8,4 +8,11 @@ export interface Arrow {
     orderAtPredecessor: number;
     t1: Point;
     t2: Point;
+    intersections:  Intersection[];
+}
+
+export interface Intersection {
+    x: number;
+    y: number;
+    position: boolean;
 }

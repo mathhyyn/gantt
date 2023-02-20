@@ -7,12 +7,12 @@
       "esnext"
     ],
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "node16", // было "node"
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
-    "types": [],
+    "types": ["node"],
     "skipLibCheck": true,
     "outDir": "dist",
     "strict": false,

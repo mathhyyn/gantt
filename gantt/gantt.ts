@@ -7,6 +7,7 @@ import {defu} from 'defu';
 const LEFT_MOUSE_BUTTON = 0;
 export class GanttWidget<T = any, K = string> implements WidgetRenderer {
     diagram: GanttDiagram;
+    diagramContainer: HTMLElement;
     x0: number;
     op: GanttOptions<T, K>;
 
@@ -17,6 +18,11 @@ export class GanttWidget<T = any, K = string> implements WidgetRenderer {
             timeline: {}
         };
         this.op = defu(options, defaults);
+    }
+
+    updateDiagram() {
+        this.diagramContainer.innerHTML = '';
+        this.diagram.render(this.diagramContainer);
     }
 
     render(parentNode: HTMLElement) {
@@ -39,6 +45,8 @@ export class GanttWidget<T = any, K = string> implements WidgetRenderer {
 
         const diagram = new GanttDiagram(timeline);
         this.diagram = diagram;
+        //убрать
+        this.diagramContainer = diagramContainer;
         diagram.render(diagramContainer);
 
         this.x0 = timelineAndDiagram.getBoundingClientRect().x;

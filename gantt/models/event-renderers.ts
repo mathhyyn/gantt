@@ -5,7 +5,8 @@ export const simpleEvent: CellRenderer = function(task: any): HTMLElement { /* Ð
     const elem = document.createElement('div');
     elem.classList.add('gantt-diagram-event');
     elem.textContent = task.title;
-    elem.style.backgroundColor = task.completed ? 'rgb(117, 184, 124)' : 'burlywood';
+    elem.style.backgroundColor = task.completed ? 'rgb(200, 200, 200);' : 'rgb(87, 154, 255)';
+    //elem.style.backgroundColor = task.completed ? 'rgb(117, 184, 124)' : 'burlywood';
     let start = new Date(task.date);
     let finish = new Date(task.deadline);
     elem.title = 'start: ' + start.toUTCString() + '\n' + 'finish: ' + finish.toUTCString();

@@ -1,4 +1,3 @@
-import {dependencies} from './../../mocks/dependencies';
 import {drawPositionedArrows} from './../models/arrows-positioning';
 import {eventsSource, dependenciesSource} from './../../mocks/test';
 import {simpleEvent} from '../models/event-renderers';
@@ -8,6 +7,9 @@ import {Arrow} from '../models/arrow';
 import {Point} from '../models/point';
 import {GanttTimeline} from '../../gantt-timeline/gantt-timeline';
 import {WidgetRenderer} from '../../widgets/models/widget-renderer';
+
+// удалить
+import { tasks, dependencies } from '../../mocks/test'
 
 export class GanttDiagram implements WidgetRenderer {
     visibleEvents: Map<string, Event> = new Map<string, Event>;
@@ -90,7 +92,7 @@ export class GanttDiagram implements WidgetRenderer {
                 let y2 = finish.cell.offsetTop;
                 //elem = drawPolyline({x: x1, y: y1}, {x: x2, y: y2}, finish.cell.clientHeight);
                 //this.svg.appendChild(elem);
-                this.visibleArrows[arrow.id] = {id: arrow.id, cell: elem, predecessor: arrow.predecessor, successor: arrow.successor, t1: {x: x1, y: y1}, t2: {x: x2, y: y2},};
+                this.visibleArrows[arrow.id] = {id: arrow.id, cell: elem, predecessor: arrow.predecessor, successor: arrow.successor, t1: {x: x1, y: y1}, t2: {x: x2, y: y2}, intersections: []};
                 // TODO:
                 this.visibleEvents[arrow.successor].x1 = x2 - 10;
                 this.visibleEvents[arrow.predecessor].x2 = x1 + 10;
@@ -101,10 +103,15 @@ export class GanttDiagram implements WidgetRenderer {
         let aa = {};
         for (let bb in this.visibleArrows)
             aa[bb] = this.visibleArrows[bb];
-        let elems = drawPositionedArrows(aa, this.visibleEvents, h);
+        let elems = drawPositionedArrows(aa, this.visibleEvents, h, true);
         for (let elem of elems) {
             //console.log(elem);
             this.svg.appendChild(elem);
+            elem.onmouseover = () => {
+                
+        this.parentNode.innerHTML = '';
+        this.render(this.parentNode);
+            }
         }
     }
     private drawArrows() {
@@ -135,7 +142,7 @@ export class GanttDiagram implements WidgetRenderer {
             this.visibleEvents[task.id].cell.style.width = width + 'px';
             this.visibleEvents[task.id].cell.style.transform = 'translate(' + x1 + 'px, 0px)';
         });
-        this.arrows.forEach(arrow => {
+        /*this.arrows.forEach(arrow => {
             let start = this.visibleEvents[arrow.predecessor];
             let finish = this.visibleEvents[arrow.successor];
             let x1 = this.getTransformTranslateX(start.cell) + start.cell.clientWidth;
@@ -143,6 +150,56 @@ export class GanttDiagram implements WidgetRenderer {
             let x2 = this.getTransformTranslateX(finish.cell);
             let y2 = finish.cell.offsetTop + finish.cell.clientHeight / 2;
             updatePolyline(this.visibleArrows[arrow.id].cell, {x: x1, y: y1}, {x: x2, y: y2}, finish.cell.clientHeight);
+        });*/
+        let h = 30;
+        this.arrows.forEach(arrow => {
+            let start = this.visibleEvents[arrow.predecessor];
+            let finish = this.visibleEvents[arrow.successor];
+            h = finish.cell.clientHeight;
+            let elem;
+            if (start && finish) {
+                let x1 = this.getTransformTranslateX(start.cell) + start.cell.clientWidth;
+                let y1 = start.cell.offsetTop;
+                let x2 = this.getTransformTranslateX(finish.cell);
+                let y2 = finish.cell.offsetTop;
+                //elem = drawPolyline({x: x1, y: y1}, {x: x2, y: y2}, finish.cell.clientHeight);
+                //this.svg.appendChild(elem);
+                this.visibleArrows[arrow.id].t1 = {x: x1, y: y1};
+                this.visibleArrows[arrow.id].t2 = {x: x2, y: y2};
+                // TODO:
+                this.visibleEvents[arrow.successor].x1 = x2 - 10;
+                this.visibleEvents[arrow.predecessor].x2 = x1 + 10;
+                this.visibleEvents[arrow.successor].y = y2;
+                this.visibleEvents[arrow.predecessor].y = y1;
+            }
         });
+
+        /*this.diagram.removeChild(this.svg);
+        this.createSVG();*/
+        this.svg.innerHTML = '';
+        console.log(this.svg.innerHTML);
+        let aa = {};
+        for (let bb in this.visibleArrows)
+            aa[bb] = this.visibleArrows[bb];
+        let elems = drawPositionedArrows(aa, this.visibleEvents, h);
+        for (let elem in this.visibleEvents) {
+            let elem2 = this.visibleEvents[elem];
+            //console.log(elem);
+            this.svg.appendChild(elem2.cell);
+            /*elem2.cell.onmouseover = (e) => {
+                console.log(e.key, 'a');
+                if (e.key == 'Delete') {
+                    for (let j = 0; j < dependencies.length; j++) {
+                        if (dependencies[j].id == elem2.id) {
+                            delete dependencies[j];
+                        }
+                    }
+                }
+            }*/
+        }
+    }
+    updateDiagram2() {
+        this.drawEvents();
+        this.drawArrows();
     }
 }

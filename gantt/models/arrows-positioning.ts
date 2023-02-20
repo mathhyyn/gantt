@@ -44,7 +44,9 @@ function compareFunction(a: Arrow, b: Arrow): number {
 function sortDependencies(events: Map<string, Event>, height: number) {
     for (let ev in events) {
         events[ev].startDependencies.sort((a: Arrow, b: Arrow) => {
+            // задача стрелки а "впереди" b "сзади"
             if (a.t2.x - a.t1.x < 0 && b.t2.x - b.t1.x >= 0)
+                // successor ниже 
                 if (a.t1.y < a.t2.y) return -1;
                 else return 1;
             if (b.t2.x - b.t1.x < 0 && a.t2.x - a.t1.x >= 0)
@@ -52,7 +54,11 @@ function sortDependencies(events: Map<string, Event>, height: number) {
                 else return -1;
             return a.t1.y - b.t1.y;
         });
-        events[ev].endDependencies.sort((a: Arrow, b: Arrow) => { return a.t2.y - b.t2.y; });
+        events[ev].endDependencies.sort((a: Arrow, b: Arrow) => {
+            if (a.t2.x < a.t1.x && b.t2.x < b.t1.x && a.t2.y >= a.t1.y && b.t2.y >= b.t1.y)
+                return b.t2.y - a.t2.y;
+            return a.t2.y - b.t2.y;
+        });
     }
     for (let ev in events) {
         let event = events[ev];
@@ -71,7 +77,8 @@ function sortDependencies(events: Map<string, Event>, height: number) {
             else i++;
 
             j++;
-            ar.t2.y += j * height / (event.startDependencies.length + 1);
+            //ar.t2.y += j * height / (event.startDependencies.length + 1);
+            ar.t2.y += height / 2
         }
 
         i = 0;
@@ -89,13 +96,19 @@ function sortDependencies(events: Map<string, Event>, height: number) {
             else i++;
 
             j++;
-            ar.t1.y += j * height / (event.endDependencies.length + 1);
+            //ar.t1.y += j * height / (event.endDependencies.length + 1);
+            ar.t1.y += height / 2
         }
     }
 }
 
-export const drawPositionedArrows = function (arrows: {}, events: Map<string, Event>, height?: number): SVGPathElement[] {
-    assignDependenciesToEvents(arrows, events);
+let vert_points = {};
+let hor_points = {};
+
+export const drawPositionedArrows = function (arrows: {}, events: Map<string, Event>, height?: number, isFirst = false): SVGPathElement[] {
+    if (isFirst) {
+        assignDependenciesToEvents(arrows, events);
+    }
     let successors = sortSuccessors(events);
     let predecessors = sortPredecessors(events);
     sortDependencies(events, height);
@@ -109,6 +122,9 @@ export const drawPositionedArrows = function (arrows: {}, events: Map<string, Ev
             events[predecessors[i].id].x2 = events[predecessors[i - 1].id].x2 - events[predecessors[i - 1].id].rightMargin * 10 - 5;
         }
     }
+
+
+
     let result: SVGPathElement[] = [];
     for (let ev in events) {
         let i = 0;
@@ -121,35 +137,129 @@ export const drawPositionedArrows = function (arrows: {}, events: Map<string, Ev
             let x22 = events[arrow.successor].x1 - arrow.orderAtSuccessor * 10;
             let y22 = events[arrow.successor].y;
 
+
             let cornerDirection = 5;
             if (events[arrow.successor].y < events[arrow.predecessor].y) cornerDirection = -5;
 
             if (t2.x - t1.x >= 20) {
-                path += (x22 - 5) + ',' + t1.y + ' Q ' + x22 + ',' + t1.y + ' ' + x22 + ',';
-                path += (t1.y + cornerDirection);
+                addHorizontalLine(t1.x, t1.y, x22 - 5, arrow);
+                addVerticalLine(t1.y + cornerDirection, x22, t2.y - cornerDirection, arrow);
             } else {
                 let x11 = events[arrow.predecessor].x2 + arrow.orderAtPredecessor * 10;
-                path += (x11 - 5) + ',' + t1.y + ' Q ' + x11 + ',' + t1.y + ' ' + x11 + ',';
-                path += (t1.y + cornerDirection);
-                path += ' L ' + x11 + ',';
+                addHorizontalLine(t1.x, t1.y, x11 - 5, arrow);
                 if (events[arrow.successor].y == events[arrow.predecessor].y) y22 += cornerDirection;
                 else y22 -= cornerDirection;
                 if (events[arrow.successor].y <= events[arrow.predecessor].y) y22 += height;
+                addVerticalLine(t1.y + cornerDirection, x11, y22 - cornerDirection, arrow);
+                
+                addHorizontalLine(x11 - 5, y22, x22 + 5, arrow);
+                if (events[arrow.successor].y == events[arrow.predecessor].y) cornerDirection = -5;
+
+                addVerticalLine(y22 + cornerDirection, x22, t2.y - cornerDirection, arrow);
+            }
+            addHorizontalLine(x22, t2.y, t2.x, arrow);
+
+            findIntersections();
+
+            // 2ой круг - отрисовка
+            cornerDirection = 5;
+            if (events[arrow.successor].y < events[arrow.predecessor].y) cornerDirection = -5;
+
+            // доделать!!!
+            if (t2.x - t1.x >= 20) {
+                addHorizontalLine(t1.x, t1.y, x22 - 5, arrow);
+                path += (x22 - 5) + ',' + t1.y + ' Q ' + x22 + ',' + t1.y + ' ' + x22 + ',';
+                path += (t1.y + cornerDirection);
+                addVerticalLine(t1.y + cornerDirection, x22, t2.y - cornerDirection, arrow);
+            } else {
+                let x11 = events[arrow.predecessor].x2 + arrow.orderAtPredecessor * 10;
+                addHorizontalLine(t1.x, t1.y, x11 - 5, arrow);
+                path += (x11 - 5) + ',' + t1.y + ' Q ' + x11 + ',' + t1.y + ' ' + x11 + ',';
+                path += (t1.y + cornerDirection);
+                path += ' L ' + x11 + ',';
                 path += (y22 - cornerDirection);
+                addVerticalLine(t1.y + cornerDirection, x11, y22 - cornerDirection, arrow);
                 path += ' Q ' + x11 + ',' + y22 + ' ' + (x11 - 5) + ',' + y22;
+                
+                addHorizontalLine(x11 - 5, y22, x22 + 5, arrow);
                 path += ' L ' + (x22 + 5) + ',' + y22 + ' Q ' + x22 + ',' + y22 + ' ' + x22 + ',';
                 if (events[arrow.successor].y == events[arrow.predecessor].y) cornerDirection = -5;
                 path += (y22 + cornerDirection);
+
+                addVerticalLine(y22 + cornerDirection, x22, t2.y - cornerDirection, arrow);
             }
+            
             path += ' L ';
             path += x22 + ',' + (t2.y - cornerDirection);
             path += ' Q ' + x22 + ',' + t2.y + ' ' + (x22 + 5) + ',' + t2.y + ' L ' + t2.x + ',' + t2.y;
+            addHorizontalLine(x22, t2.y, t2.x, arrow);
             elem.setAttribute('d', path);
             //if (t2.x < t1.x) elem.setAttribute('stroke', 'red'); else 
             elem.setAttribute('stroke', 'black');
             elem.setAttribute('fill', 'none');
-            result.push(elem);
+            arrow.cell = elem;
+            //result.push(elem);
         }
     }
     return result;
 };
+
+export const cutArrows = function (arrows: {}, events: Map<string, Event>, height?: number): SVGPathElement[] {
+
+
+
+    return [];
+}
+
+const addHorizontalLine = function (x01: number, y0: number, x02: number, ar: Arrow) {
+    let x1 = Math.floor(x01);
+    let y = Math.floor(y0);
+    let x2 = Math.floor(x02);
+    if (x2 >= x1)
+        for (let i = x1; i <= x2; i++) {
+            addHorizontalPoint(i, y, ar);
+        }
+    else for (let i = x2; i <= x1; i++) {
+        addHorizontalPoint(i, y, ar);
+    }
+}
+
+const addVerticalLine = function (y01: number, x0: number, y02: number, ar: Arrow, position: boolean = false) {
+    let y1 = Math.floor(y01);
+    let x = Math.floor(x0);
+    let y2 = Math.floor(y02);
+    if (y2 >= y1)
+        for (let i = y1; i <= y2; i++) {
+            addVerticalalPoint(x, i, ar, position);
+        }
+    else for (let i = y2; i <= y1; i++) {
+        addVerticalalPoint(x, i, ar, position);
+    }
+}
+
+const addHorizontalPoint = function (x: number, y: number, ar: Arrow) {
+    /*let x = Math.floor(x0);
+    let y = Math.floor(y0);*/
+    let id = x + '+' + y;
+    if (!hor_points[id]) hor_points[id] = [ar]
+    else hor_points[id].push(ar);
+}
+
+const addVerticalalPoint = function (x: number, y: number, ar: Arrow, position: boolean) {
+    /*let x = Math.floor(x0);
+    let y = Math.floor(y0);*/
+    let id = x + '+' + y;
+    if (!vert_points[id]) vert_points[id] = [{arrow: ar, position: position, x: x, y: y}]
+    else vert_points[id].push({arrow: ar, position: position});
+}
+
+const findIntersections = function () {
+    for (let id in vert_points) {
+        if (hor_points[id]) {
+            let point = vert_points[id];
+            //point.arrow.intersections.push({x: point.x, y: point.y, position: point.position});
+        }
+
+    }
+    // position == true для второй вертикальной линии в стрелке
+}

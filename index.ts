@@ -1,5 +1,5 @@
-import {GanttWidget} from './gantt/gantt';
-import {aggregationLevels} from './gantt-timeline/date-aggregation-levels';
+import { GanttWidget } from './gantt/gantt';
+import { aggregationLevels } from './gantt-timeline/date-aggregation-levels';
 
 const intervalStart = new Date();
 const intervalEnd = Date.now() + 1000 * 24 * 60 * 60;
@@ -28,4 +28,68 @@ const gantt = new GanttWidget({
 });
 
 gantt.render(document.querySelector('body'));
+
+//import { Viz } from 'viz.js';
+/*import {graphviz2} from "d3-graphviz";
+
+const graphviz = require("@hpcc-js/wasm");
+
+const dot = "digraph G { Hello -> World }";
+
+graphviz.dot(dot).then(svg => {
+    const div = document.getElementById("graph");
+    div.innerHTML = svg;    
+});*/
+
+import { tasks, dependencies } from './mocks/test'
+
+let ngButton = document.createElement('button');
+ngButton.textContent = "Get network graph";
+document.body.appendChild(ngButton);
+
+let addTaskButton = document.createElement('button');
+addTaskButton.textContent = "Add task";
+document.body.appendChild(addTaskButton);
+
+
+let ng = document.createElement('div');
+document.body.appendChild(ng);
+
+ngButton.onclick = () => {
+    let graph = "digraph { \nrankdir = LR\n";
+    for (let t of tasks) {
+        graph += t.id + " [label = \"" + t.title + "\", shape = box]" + "\n";
+    }
+    for (let d of dependencies) {
+        graph += d.predecessor + " -> " + d.successor + "\n";
+    }
+    graph += "}";
+    ng.innerText = graph;
+    /*graphviz.graphviz("#graph")
+    .renderDot('digraph {a -> b}');*/
+}
+
+let addTaskWindow = document.getElementById("addTaskWindow");
+
+addTaskButton.onclick = () => {
+    addTaskWindow.style.display = "flex";
+}
+
+let closeTaskWindow = document.getElementById("closeTaskWindow");
+
+let count = 0;
+
+closeTaskWindow.onclick = () => {
+    let taskTitle = (document.getElementById("name") as HTMLInputElement).value;
+    let taskDate = (document.getElementById("date") as HTMLInputElement).value;
+    let taskDeadline = (document.getElementById("deadline") as HTMLInputElement).value;
+    let taskIsCompleted = (document.getElementById("completed") as HTMLInputElement).value;
+
+    count++;
+    tasks.push({id: "new"+count, title: taskTitle,  date: taskDate, deadline: taskDeadline, completed: taskIsCompleted});
+    gantt.updateDiagram();
+
+    addTaskWindow.style.display = "none";
+}
+
 

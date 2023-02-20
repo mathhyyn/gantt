@@ -4,10 +4,43 @@
 <head>
   <meta charset=utf8>
   <title>Gantt</title>
+  <style>
+    #addTaskWindow {
+      width: 300px;
+      height: auto;
+
+      padding: 15px;
+      border: 3px solid #0000cc;
+      border-radius: 10px;
+      color: #0000cc;
+      position: fixed;
+      z-index: 5;
+      top: 40%;
+      left: 30%;
+      background: #fff;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+    button {
+      margin-top: 20px;
+      margin-left: 20px;
+    }
+  </style>
 </head>
 
 <body>
-
+  <div id="addTaskWindow">
+    <p>Добавить новую задачу</p>
+    Название:
+    <input id = "name" type = "text">
+    Дата начала:
+    <input id = "date" type = "text">
+    Дедлайн:
+    <input id = "deadline" type = "text">
+    <input id = "completed" type = "checkbox">
+    <button id = "closeTaskWindow">Сохранить</button>
+  </div>
 </body>
 
 </html>
