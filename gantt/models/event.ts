@@ -4,7 +4,7 @@ export interface Event {
     cell?: HTMLDivElement;
     date: string;
     deadline: string;
-    completed: string;
+    completed: boolean;
     startDependencies: Arrow[];
     endDependencies: Arrow[];
     x1: number;

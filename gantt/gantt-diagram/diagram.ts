@@ -58,7 +58,13 @@ export class GanttDiagram implements WidgetRenderer {
             let cell = this.drawEvent(start, finish);
             let event = simpleEvent(task);
             cell.appendChild(event);
-            event.onclick = (e) => {
+
+            
+            this.visibleEvents[task.id] = { id: task.id, cell: cell, date: task.date, deadline: task.deadline, startDependencies: [], endDependencies: [], completed: task.completed};
+            /*event.onclick = (e) => {
+                
+            }*/
+            cell.onclick = (e) => {
                 if (e.shiftKey) {
                     for (let j = 0; j < tasks.length; j++) {
                         if (tasks[j].id == task.id) {
@@ -76,22 +82,24 @@ export class GanttDiagram implements WidgetRenderer {
                     this.parentNode.innerHTML = '';
                     this.render(this.parentNode);
                 }
-            }
-            cell.onclick = (e) => {
                 if (e.altKey) {
                     if (!beginningSelected) {
                         dependencyBeginning = task;
                         beginningSelected = true;
                     } else {
+                        beginningSelected = false;
                         dependenciesCount++;
                         dependencies.push({ id: "new" + dependenciesCount, predecessor: dependencyBeginning.id, successor: task.id });
                         this.parentNode.innerHTML = '';
                         this.render(this.parentNode);
                     }
                 }
+                if (e.ctrlKey) {
+                    this.visibleEvents[task.id].completed = !this.visibleEvents[task.id].completed;
+                    this.visibleEvents[task.id].cell.firstChild.style.backgroundColor = this.visibleEvents[task.id].completed ? 'rgb(174, 174, 174)' : 'rgb(87, 154, 255)';
+                }
             }
             this.eventsContainer.appendChild(cell);
-            this.visibleEvents[task.id] = { id: task.id, cell: cell, date: task.date, deadline: task.deadline, startDependencies: [], endDependencies: [] };
         });
 
         this.createSVG();

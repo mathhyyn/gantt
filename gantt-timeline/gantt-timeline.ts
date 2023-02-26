@@ -188,7 +188,7 @@ export class GanttTimeline implements WidgetRenderer {
 
     getCoordByTime(date: Date) {
         let time = date.getTime();
-        // time += new Date().getTimezoneOffset() * 60 * 1000;
+        time += new Date().getTimezoneOffset() * 60 * 1000;
         return (time - this.startTime + this.x * this.density) / this.density;
     }
 }

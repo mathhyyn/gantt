@@ -23,6 +23,7 @@
   margin: 5px 0px 5px 0px;
   height: 30px;
   user-select: none;
+  z-index: 3;
 }
 
 .gantt-diagram-event {
@@ -38,6 +39,7 @@
   //background-color: rgb(117, 184, 124);
   border-radius: 2px;
   user-select: none;
+  z-index: 3;
 }
 
 .gantt-svg {

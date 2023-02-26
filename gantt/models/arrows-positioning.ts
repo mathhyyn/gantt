@@ -1,4 +1,3 @@
-import { dependencies } from './../../mocks/dependencies';
 import { Arrow } from './arrow';
 import { Event } from './event';
 

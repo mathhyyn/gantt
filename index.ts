@@ -83,7 +83,8 @@ closeTaskWindow.onclick = () => {
     let taskTitle = (document.getElementById("name") as HTMLInputElement).value;
     let taskDate = (document.getElementById("date") as HTMLInputElement).value;
     let taskDeadline = (document.getElementById("deadline") as HTMLInputElement).value;
-    let taskIsCompleted = (document.getElementById("completed") as HTMLInputElement).value;
+    let taskIsCompleted = (document.getElementById("completed") as HTMLInputElement).checked;
+    console.log(document.getElementById("completed"), taskIsCompleted);
 
     count++;
     tasks.push({id: "new"+count, title: taskTitle,  date: taskDate, deadline: taskDeadline, completed: taskIsCompleted});
